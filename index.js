@@ -21,10 +21,16 @@ async function toggleModule(module) {
     const distOrig = path.join(pathname, "dist-orig");
     const localDist = path.resolve("..", module, "dist");
 
-    if (await isLocal(module)) {
+    if (!fs.existsSync(pathname)) {
+        console.log(`${module}: No such module`);
+    } else if (!fs.existsSync(dist)) {
+        console.log(`${module}: Exists but has no dist directory`);
+    } else if (await isLocal(module)) {
         await fsp.unlink(dist);
         await fsp.rename(distOrig, dist);
         console.log(`${module}: Now pointing to registry`);
+    } else if (!fs.existsSync(localDist)) {
+        console.log(`${module}: Has no local repo`);
     } else {
         await fsp.rename(dist, distOrig);
         await fsp.symlink(localDist, dist);
